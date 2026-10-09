@@ -40,6 +40,7 @@ $ npm install
 ```
 
 - Run migration files `npm run migrate:run`
+- To seed entries `npm run seed:users`
 
 ## Compile and run the project
 
