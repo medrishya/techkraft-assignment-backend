@@ -54,6 +54,27 @@ services:
     networks:
       - merchant-network
 
+  seed:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: merchant-risk-seed
+    restart: 'no'
+    env_file:
+      - .env.docker
+    environment:
+      NODE_ENV: development
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+    command: ['npm', 'run', 'seed:users']
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    networks:
+      - merchant-network
+
   api:
     build:
       context: .
@@ -72,7 +93,7 @@ services:
     ports:
       - '3000:3000'
     depends_on:
-      migrate:
+      seed:
         condition: service_completed_successfully
       redis:
         condition: service_healthy

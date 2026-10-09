@@ -24,7 +24,7 @@ COPY package*.json ./
 
 # Install all dependencies, including TypeScript migration tools
 # required by typeorm-ts-node-commonjs
-RUN npm ci && npm cache clean --force
+RUN npm ci --include=dev && npm cache clean --force
 
 # Include compiled application and TypeScript source files
 COPY --from=builder /app/dist ./dist

@@ -35,10 +35,6 @@ export class ApplicationsService {
     private readonly auditService: AuditService,
   ) {}
 
-  // =========================================================
-  // CREATE
-  // =========================================================
-
   async create(
     dto: CreateApplicationDto,
     user: User,
@@ -60,10 +56,6 @@ export class ApplicationsService {
     return this.applicationRepository.save(application);
   }
 
-  // =========================================================
-  // LIST
-  // =========================================================
-
   async findAll(query: ListApplicationsDto, user: User) {
     const page = query.page ?? 1;
     const limit = query.limit ?? 20;
@@ -72,33 +64,13 @@ export class ApplicationsService {
 
     const where: FindOptionsWhere<MerchantApplication> = {};
 
-    /*
-     * Object-level authorization is applied directly
-     * to the list query.
-     *
-     * SALES:
-     * only applications created by this user.
-     */
     if (user.role === UserRole.SALES) {
       where.createdById = user.id;
     }
 
-    /*
-     * REVIEWER:
-     * only applications assigned to this reviewer.
-     */
     if (user.role === UserRole.REVIEWER) {
       where.assignedReviewerId = user.id;
     }
-
-    /*
-     * ADMIN:
-     * no ownership restriction.
-     */
-
-    /*
-     * Optional status filtering.
-     */
     if (query.status) {
       where.applicationStatus = query.status;
     }
@@ -127,10 +99,6 @@ export class ApplicationsService {
     };
   }
 
-  // =========================================================
-  // RETRIEVE
-  // =========================================================
-
   async findOne(id: string, user: User): Promise<MerchantApplication> {
     const application = await this.applicationRepository.findOne({
       where: { id },
@@ -148,10 +116,6 @@ export class ApplicationsService {
 
     return application;
   }
-
-  // =========================================================
-  // UPDATE
-  // =========================================================
 
   async update(
     id: string,
@@ -172,10 +136,6 @@ export class ApplicationsService {
 
     return this.applicationRepository.save(application);
   }
-
-  // =========================================================
-  // SUBMIT
-  // =========================================================
 
   async submit(id: string, user: User): Promise<MerchantApplication> {
     const application = await this.applicationRepository.findOne({
@@ -216,18 +176,11 @@ export class ApplicationsService {
     return saved;
   }
 
-  // =========================================================
-  // ASSIGN REVIEWER
-  // =========================================================
-
   async assignReviewer(
     id: string,
     dto: AssignReviewerDto,
     user: User,
   ): Promise<MerchantApplication> {
-    /*
-     * Only ADMIN can assign reviewers.
-     */
     if (user.role !== UserRole.ADMIN) {
       throw new ForbiddenException('Only ADMIN can assign reviewers');
     }
@@ -240,10 +193,6 @@ export class ApplicationsService {
       throw new NotFoundException('Application not found');
     }
 
-    /*
-     * Reviewer assignment is only valid after
-     * the application has been submitted.
-     */
     if (application.applicationStatus !== ApplicationStatus.SUBMITTED) {
       throw new BadRequestException(
         `Application cannot be assigned from status ${application.applicationStatus}`,
@@ -274,7 +223,7 @@ export class ApplicationsService {
 
     const saved = await this.applicationRepository.save(application);
     await this.auditService.record({
-      actorUserId: user?.id, // ID of the authenticated user making the assignment
+      actorUserId: user?.id,
       action: 'REVIEWER_ASSIGNED',
       entityType: 'MERCHANT_APPLICATION',
       entityId: application.id,
@@ -285,10 +234,6 @@ export class ApplicationsService {
     });
     return saved;
   }
-
-  // =========================================================
-  // RISK DECISION
-  // =========================================================
 
   async recordRiskDecision(
     id: string,
@@ -303,52 +248,28 @@ export class ApplicationsService {
       throw new NotFoundException('Application not found');
     }
 
-    /*
-     * A risk decision can only be made while the
-     * application is UNDER_REVIEW.
-     */
     if (application.applicationStatus !== ApplicationStatus.UNDER_REVIEW) {
       throw new BadRequestException(
         `Risk decision cannot be made from status ${application.applicationStatus}`,
       );
     }
 
-    /*
-     * ADMIN has full operational access.
-     */
     if (user.role === UserRole.ADMIN) {
       // allowed
-    }
-
-    /*
-     * REVIEWER must be the reviewer assigned
-     * to THIS application.
-     */
-    else if (user.role === UserRole.REVIEWER) {
+    } else if (user.role === UserRole.REVIEWER) {
       if (application.assignedReviewerId !== user.id) {
         throw new ForbiddenException('You are not the assigned reviewer');
       }
-    }
-
-    /*
-     * SALES cannot make risk decisions.
-     */
-    else {
+    } else {
       throw new ForbiddenException('SALES users cannot make risk decisions');
     }
 
-    /*
-     * PENDING is not a decision.
-     */
     if (dto.decision === RiskStatus.PENDING) {
       throw new BadRequestException(
         'PENDING cannot be used as a risk decision',
       );
     }
 
-    /*
-     * APPROVED
-     */
     if (dto.decision === RiskStatus.APPROVED) {
       application.riskStatus = RiskStatus.APPROVED;
 
@@ -357,9 +278,6 @@ export class ApplicationsService {
       return this.applicationRepository.save(application);
     }
 
-    /*
-     * REJECTED
-     */
     if (dto.decision === RiskStatus.REJECTED) {
       application.riskStatus = RiskStatus.REJECTED;
 
@@ -368,12 +286,6 @@ export class ApplicationsService {
       return this.applicationRepository.save(application);
     }
 
-    /*
-     * NEEDS_INFO
-     *
-     * Reviewer requests additional information
-     * from the merchant.
-     */
     if (dto.decision === RiskStatus.NEEDS_INFO) {
       application.riskStatus = RiskStatus.NEEDS_INFO;
 
@@ -385,10 +297,6 @@ export class ApplicationsService {
     throw new BadRequestException('Invalid risk decision');
   }
 
-  // =========================================================
-  // CREATE AUTHORIZATION
-  // =========================================================
-
   private assertCanCreate(user: User): void {
     if (user.role !== UserRole.ADMIN && user.role !== UserRole.SALES) {
       throw new ForbiddenException(
@@ -397,22 +305,11 @@ export class ApplicationsService {
     }
   }
 
-  // =========================================================
-  // VIEW AUTHORIZATION
-  // =========================================================
-
   private assertCanView(application: MerchantApplication, user: User): void {
-    /*
-     * ADMIN can view everything.
-     */
     if (user.role === UserRole.ADMIN) {
       return;
     }
 
-    /*
-     * REVIEWER can only view applications assigned
-     * to them.
-     */
     if (user.role === UserRole.REVIEWER) {
       if (application.assignedReviewerId !== user.id) {
         throw new ForbiddenException(
@@ -423,9 +320,6 @@ export class ApplicationsService {
       return;
     }
 
-    /*
-     * SALES can only view applications they created.
-     */
     if (user.role === UserRole.SALES) {
       if (application.createdById !== user.id) {
         throw new ForbiddenException(
@@ -439,40 +333,18 @@ export class ApplicationsService {
     throw new ForbiddenException();
   }
 
-  // =========================================================
-  // EDIT AUTHORIZATION
-  // =========================================================
-
   private assertCanEdit(application: MerchantApplication, user: User): void {
-    /*
-     * ADMIN can edit applications.
-     */
     if (user.role === UserRole.ADMIN) {
       return;
     }
 
-    /*
-     * SALES:
-     *
-     * 1. Must own the application.
-     * 2. Application must still be editable.
-     */
     if (user.role === UserRole.SALES) {
-      /*
-       * Object-level authorization.
-       */
       if (application.createdById !== user.id) {
         throw new ForbiddenException(
           'You can only edit applications you created',
         );
       }
 
-      /*
-       * SALES can edit only:
-       *
-       * DRAFT
-       * NEEDS_INFO
-       */
       const isEditable =
         application.applicationStatus === ApplicationStatus.DRAFT ||
         application.applicationStatus === ApplicationStatus.NEEDS_INFO;
@@ -486,10 +358,6 @@ export class ApplicationsService {
       return;
     }
 
-    /*
-     * REVIEWER cannot edit merchant application
-     * information.
-     */
     throw new ForbiddenException(
       'You do not have permission to edit applications',
     );

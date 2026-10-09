@@ -128,10 +128,6 @@ describe('ApplicationsService', () => {
     jest.clearAllMocks();
   });
 
-  // ============================================================
-  // CREATE
-  // ============================================================
-
   describe('create', () => {
     it('should allow SALES to create an application', async () => {
       const application = createApplication();
@@ -200,10 +196,6 @@ describe('ApplicationsService', () => {
       );
     });
   });
-
-  // ============================================================
-  // FIND ALL
-  // ============================================================
 
   describe('findAll', () => {
     it('should return only applications created by SALES user', async () => {

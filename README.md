@@ -31,7 +31,7 @@ JWT_SECRET=replace_with_a_long_random_development_secret
 
 ```
 
-Run `docker compose up -d --build`
+Run `docker-compose up -d --build`
 
 ## Project setup
 

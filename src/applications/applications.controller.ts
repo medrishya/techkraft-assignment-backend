@@ -46,10 +46,6 @@ import { RiskStatus } from './enums/risk-status.enum';
 export class ApplicationsController {
   constructor(private readonly applicationsService: ApplicationsService) {}
 
-  // =========================================================
-  // CREATE
-  // =========================================================
-
   @Post()
   @ApiOperation({
     summary: 'Create merchant application',
@@ -103,10 +99,6 @@ export class ApplicationsController {
   ) {
     return this.applicationsService.create(dto, req.user);
   }
-
-  // =========================================================
-  // LIST
-  // =========================================================
 
   @Get()
   @ApiOperation({
@@ -174,10 +166,6 @@ export class ApplicationsController {
     return this.applicationsService.findAll(query, req.user);
   }
 
-  // =========================================================
-  // RETRIEVE
-  // =========================================================
-
   @Get(':id')
   @ApiOperation({
     summary: 'Get merchant application',
@@ -224,10 +212,6 @@ export class ApplicationsController {
   ) {
     return this.applicationsService.findOne(id, req.user);
   }
-
-  // =========================================================
-  // UPDATE
-  // =========================================================
 
   @Patch(':id')
   @ApiOperation({
@@ -284,10 +268,6 @@ export class ApplicationsController {
     return this.applicationsService.update(id, dto, req.user);
   }
 
-  // =========================================================
-  // SUBMIT
-  // =========================================================
-
   @Post(':id/submit')
   @ApiOperation({
     summary: 'Submit merchant application',
@@ -326,10 +306,6 @@ export class ApplicationsController {
   ) {
     return this.applicationsService.submit(id, req.user);
   }
-
-  // =========================================================
-  // ASSIGN REVIEWER
-  // =========================================================
 
   @Patch(':id/assign-reviewer')
   @ApiOperation({
@@ -383,10 +359,6 @@ export class ApplicationsController {
   ) {
     return this.applicationsService.assignReviewer(id, dto, req.user);
   }
-
-  // =========================================================
-  // RISK DECISION
-  // =========================================================
 
   @Post(':id/risk-decision')
   @ApiOperation({

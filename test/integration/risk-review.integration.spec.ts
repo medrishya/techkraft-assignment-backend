@@ -43,8 +43,6 @@ describe('RiskReviewService integration', () => {
 
     userRepository = app.get(getRepositoryToken(User));
 
-    // Use the real provider instance but replace its external check
-    // so integration tests are deterministic.
     kybProvider = app.get(KybProvider);
   });
 
@@ -64,8 +62,6 @@ describe('RiskReviewService integration', () => {
   });
 
   async function createTestUser(): Promise<User> {
-    // Add any other required fields from your User entity here.
-    // Adjust "password" if your entity uses a different property.
     const user = userRepository.create({
       email: 'sales@example.com',
       passwordHash: 'TestPassword123!',
@@ -211,7 +207,6 @@ describe('RiskReviewService integration', () => {
 
       expect(reviews).toHaveLength(1);
 
-      // Existing result should not overwrite the application's state.
       const savedApplication = await applicationRepository.findOneByOrFail({
         id: application.id,
       });
