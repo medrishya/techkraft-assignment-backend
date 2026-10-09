@@ -1,0 +1,6 @@
+export enum RiskStatus {
+  PENDING = 'PENDING',
+  APPROVED = 'APPROVED',
+  NEEDS_INFO = 'NEEDS_INFO',
+  REJECTED = 'REJECTED',
+}

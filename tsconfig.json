@@ -1,0 +1,29 @@
+{
+  "compilerOptions": {
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+
+    "target": "ES2023",
+
+    "esModuleInterop": true,
+    "isolatedModules": true,
+
+    "declaration": true,
+    "removeComments": true,
+
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+
+    "types": ["node", "jest"],
+
+    "sourceMap": true,
+    "outDir": "./dist",
+    "rootDir": ".",
+    "incremental": true,
+
+    "skipLibCheck": true,
+    "strict": true,
+    "strictPropertyInitialization": false
+  }
+}
